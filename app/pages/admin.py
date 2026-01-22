@@ -84,8 +84,132 @@ def status_badge(status: str) -> rx.Component:
     )
 
 
+def edit_modal() -> rx.Component:
+    return rx.cond(
+        AdminState.is_editing,
+        rx.el.div(
+            rx.el.div(
+                rx.el.div(
+                    rx.el.h2(
+                        "EDITAR RESERVA",
+                        class_name="text-lg font-bold text-[#D4AF37] tracking-widest mb-6",
+                    ),
+                    rx.el.div(
+                        rx.el.label(
+                            "CLIENTE",
+                            class_name="text-[10px] font-bold tracking-widest text-gray-500 mb-2 block",
+                        ),
+                        rx.el.input(
+                            value=AdminState.edit_client_name,
+                            on_change=AdminState.set_edit_client_name,
+                            class_name="w-full bg-[#111111] border border-white/10 rounded p-3 text-white focus:border-[#D4AF37] outline-none transition-all mb-4",
+                        ),
+                        rx.el.label(
+                            "TELÉFONO",
+                            class_name="text-[10px] font-bold tracking-widest text-gray-500 mb-2 block",
+                        ),
+                        rx.el.input(
+                            value=AdminState.edit_client_phone,
+                            on_change=AdminState.set_edit_client_phone,
+                            class_name="w-full bg-[#111111] border border-white/10 rounded p-3 text-white focus:border-[#D4AF37] outline-none transition-all mb-4",
+                        ),
+                        rx.el.label(
+                            "SERVICIO",
+                            class_name="text-[10px] font-bold tracking-widest text-gray-500 mb-2 block",
+                        ),
+                        rx.el.div(
+                            rx.el.select(
+                                rx.foreach(
+                                    ServicesState.services,
+                                    lambda s: rx.el.option(s["name"], value=s["name"]),
+                                ),
+                                value=AdminState.edit_service_name,
+                                on_change=AdminState.set_edit_service_name,
+                                class_name="w-full bg-[#111111] border border-white/10 rounded p-3 text-white appearance-none pr-8 focus:border-[#D4AF37] outline-none transition-colors",
+                            ),
+                            rx.icon(
+                                "chevron-down",
+                                size=14,
+                                class_name="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none",
+                            ),
+                            class_name="relative mb-4",
+                        ),
+                        rx.el.label(
+                            "BARBERO",
+                            class_name="text-[10px] font-bold tracking-widest text-gray-500 mb-2 block",
+                        ),
+                        rx.el.div(
+                            rx.el.select(
+                                rx.foreach(
+                                    BarbersState.barbers,
+                                    lambda b: rx.el.option(b["name"], value=b["name"]),
+                                ),
+                                value=AdminState.edit_barber_name,
+                                on_change=AdminState.set_edit_barber_name,
+                                class_name="w-full bg-[#111111] border border-white/10 rounded p-3 text-white appearance-none pr-8 focus:border-[#D4AF37] outline-none transition-colors",
+                            ),
+                            rx.icon(
+                                "chevron-down",
+                                size=14,
+                                class_name="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none",
+                            ),
+                            class_name="relative mb-4",
+                        ),
+                        rx.el.div(
+                            rx.el.div(
+                                rx.el.label(
+                                    "FECHA",
+                                    class_name="text-[10px] font-bold tracking-widest text-gray-500 mb-2 block",
+                                ),
+                                rx.el.input(
+                                    type="date",
+                                    value=AdminState.edit_date,
+                                    on_change=AdminState.set_edit_date,
+                                    class_name="w-full bg-[#111111] border border-white/10 rounded p-3 text-white focus:border-[#D4AF37] outline-none transition-all",
+                                ),
+                            ),
+                            rx.el.div(
+                                rx.el.label(
+                                    "HORA",
+                                    class_name="text-[10px] font-bold tracking-widest text-gray-500 mb-2 block",
+                                ),
+                                rx.el.input(
+                                    value=AdminState.edit_time,
+                                    on_change=AdminState.set_edit_time,
+                                    class_name="w-full bg-[#111111] border border-white/10 rounded p-3 text-white focus:border-[#D4AF37] outline-none transition-all",
+                                ),
+                            ),
+                            class_name="grid grid-cols-2 gap-4 mb-8",
+                        ),
+                        rx.el.div(
+                            rx.el.button(
+                                "CANCELAR",
+                                on_click=AdminState.cancel_edit_reservation,
+                                class_name="px-6 py-3 bg-white/5 text-white font-bold tracking-widest rounded hover:bg-white/10 transition-all",
+                            ),
+                            rx.el.button(
+                                "GUARDAR CAMBIOS",
+                                on_click=AdminState.save_edit_reservation,
+                                class_name="px-6 py-3 bg-[#D4AF37] text-black font-bold tracking-widest rounded hover:bg-white transition-all",
+                            ),
+                            class_name="flex justify-end gap-4",
+                        ),
+                    ),
+                    class_name="bg-[#111111] w-full max-w-md rounded-xl p-8 shadow-2xl border border-white/10 relative overflow-hidden",
+                ),
+                class_name="fixed inset-0 z-[60] flex items-center justify-center p-4",
+            ),
+            rx.el.div(
+                class_name="fixed inset-0 bg-black/90 backdrop-blur-sm z-[55]",
+                on_click=AdminState.cancel_edit_reservation,
+            ),
+        ),
+    )
+
+
 def reservation_row(res: Reservation) -> rx.Component:
     return rx.el.tr(
+        rx.el.td(res["date"], class_name="py-4 text-white font-mono font-bold"),
         rx.el.td(res["time"], class_name="py-4 text-white font-mono font-bold"),
         rx.el.td(
             rx.el.div(res["client_name"], class_name="text-white font-bold"),
@@ -104,6 +228,12 @@ def reservation_row(res: Reservation) -> rx.Component:
         rx.el.td(
             rx.el.div(
                 rx.el.button(
+                    rx.icon("pencil", size=16),
+                    on_click=lambda: AdminState.start_edit_reservation(res),
+                    class_name="p-2 hover:bg-blue-500/20 text-blue-500 rounded transition-colors",
+                    title="Editar",
+                ),
+                rx.el.button(
                     rx.icon("check", size=16),
                     on_click=lambda: AdminState.update_status(res["id"], "completed"),
                     class_name="p-2 hover:bg-green-500/20 text-green-500 rounded transition-colors",
@@ -115,6 +245,12 @@ def reservation_row(res: Reservation) -> rx.Component:
                     class_name="p-2 hover:bg-red-500/20 text-red-500 rounded transition-colors",
                     title="Cancelar",
                 ),
+                 rx.el.button(
+                    rx.icon("trash-2", size=16),
+                     on_click=lambda: AdminState.delete_reservation(res["id"]),
+                     class_name="p-2 hover:bg-red-700/20 text-red-700 rounded transition-colors",
+                     title="Eliminar permanentemente",
+                 ),
                 class_name="flex gap-2",
             ),
             class_name="py-4",
@@ -126,6 +262,7 @@ def reservation_row(res: Reservation) -> rx.Component:
 def admin_dashboard() -> rx.Component:
     return rx.el.div(
         admin_sidebar(),
+        edit_modal(),
         rx.el.main(
             rx.el.div(
                 rx.el.h1("Dashboard", class_name="text-3xl font-bold text-white mb-8"),
@@ -139,10 +276,56 @@ def admin_dashboard() -> rx.Component:
                             type="date",
                             on_change=AdminState.set_date,
                             class_name="bg-[#111111] border border-white/10 rounded p-2 text-white outline-none focus:border-[#D4AF37]",
-                            default_value=AdminState.selected_date,
+                            value=AdminState.selected_date,
                         ),
                     ),
-                    class_name="flex justify-between items-end mb-8",
+                    rx.el.div(
+                        rx.el.label(
+                            "ESTADO",
+                            class_name="text-[10px] font-bold tracking-widest text-gray-500 mb-2 block",
+                        ),
+                        rx.el.div(
+                            rx.el.select(
+                                rx.el.option("Todos", value="all"),
+                                rx.el.option("Confirmado", value="confirmed"),
+                                rx.el.option("Pendiente", value="pending"),
+                                rx.el.option("Completado", value="completed"),
+                                rx.el.option("Cancelado", value="cancelled"),
+                                on_change=AdminState.set_filter_status,
+                                class_name="w-full bg-[#111111] border border-white/10 rounded p-2 text-white text-sm appearance-none pr-8 focus:border-[#D4AF37] outline-none transition-colors",
+                                value=AdminState.filter_status,
+                            ),
+                            rx.icon(
+                                "chevron-down",
+                                size=14,
+                                class_name="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none",
+                            ),
+                            class_name="relative",
+                        ),
+                    ),
+                    rx.el.div(
+                        rx.el.label(
+                            "ORDENAR",
+                            class_name="text-[10px] font-bold tracking-widest text-gray-500 mb-2 block",
+                        ),
+                        rx.el.div(
+                            rx.el.select(
+                                rx.el.option("Hora Ascendente", value="time_asc"),
+                                rx.el.option("Hora Descendente", value="time_desc"),
+                                rx.el.option("Estado", value="status"),
+                                on_change=AdminState.set_sort_option,
+                                class_name="w-full bg-[#111111] border border-white/10 rounded p-2 text-white text-sm appearance-none pr-8 focus:border-[#D4AF37] outline-none transition-colors",
+                                value=AdminState.sort_option,
+                            ),
+                            rx.icon(
+                                "chevron-down",
+                                size=14,
+                                class_name="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none",
+                            ),
+                            class_name="relative",
+                        ),
+                    ),
+                    class_name="flex flex-wrap gap-6 items-end mb-8",
                 ),
                 rx.el.div(
                     rx.el.h3(
@@ -154,13 +337,13 @@ def admin_dashboard() -> rx.Component:
                             placeholder="Nombre Cliente",
                             on_change=AdminState.set_walk_in_client,
                             class_name="bg-[#111111] border border-white/10 rounded p-2 text-white text-sm",
-                            default_value=AdminState.walk_in_client,
+                            value=AdminState.walk_in_client,
                         ),
                         rx.el.input(
                             placeholder="Teléfono",
                             on_change=AdminState.set_walk_in_phone,
                             class_name="bg-[#111111] border border-white/10 rounded p-2 text-white text-sm",
-                            default_value=AdminState.walk_in_phone,
+                            value=AdminState.walk_in_phone,
                         ),
                         rx.el.div(
                             rx.el.select(
@@ -204,7 +387,7 @@ def admin_dashboard() -> rx.Component:
                             type="datetime-local",
                             on_change=AdminState.set_walk_in_datetime,
                             class_name="bg-[#111111] border border-white/10 rounded p-2 text-white text-sm focus:border-[#D4AF37] outline-none transition-colors",
-                            default_value=AdminState.walk_in_datetime,
+                            value=AdminState.walk_in_datetime,
                         ),
                         rx.el.button(
                             "AGREGAR",
@@ -219,6 +402,10 @@ def admin_dashboard() -> rx.Component:
                     rx.el.table(
                         rx.el.thead(
                             rx.el.tr(
+                                rx.el.th(
+                                    "FECHA",
+                                    class_name="text-left text-[10px] font-bold tracking-widest text-gray-500 pb-4",
+                                ),
                                 rx.el.th(
                                     "HORA",
                                     class_name="text-left text-[10px] font-bold tracking-widest text-gray-500 pb-4",
@@ -255,6 +442,11 @@ def admin_dashboard() -> rx.Component:
                 ),
             ),
             class_name="ml-64 p-10 min-h-screen bg-[#0A0A0A]",
+            on_mount=[
+                AdminState.check_auth,
+                AdminState.load_reservations,
+                AdminState.load_analytics,
+            ],
         ),
     )
 
@@ -382,6 +574,7 @@ def admin_analytics() -> rx.Component:
                 ),
             ),
             class_name="ml-64 p-10 min-h-screen bg-[#0A0A0A]",
+            on_mount=[AdminState.check_auth, AdminState.load_analytics],
         ),
     )
 
@@ -526,6 +719,7 @@ def admin_services() -> rx.Component:
                 ),
             ),
             class_name="ml-64 p-10 min-h-screen bg-[#0A0A0A]",
+            on_mount=AdminState.check_auth,
         ),
     )
 
@@ -652,5 +846,6 @@ def admin_barbers() -> rx.Component:
                 ),
             ),
             class_name="ml-64 p-10 min-h-screen bg-[#0A0A0A]",
+            on_mount=AdminState.check_auth,
         ),
     )

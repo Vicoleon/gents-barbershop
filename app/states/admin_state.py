@@ -69,11 +69,45 @@ class AdminState(rx.State):
         self.selected_date = date
         return AdminState.load_reservations
 
+    filter_status: str = "all"
+    sort_option: str = "time_asc"
+
+    @rx.event
+    def set_filter_status(self, value: str):
+        self.filter_status = value
+        return AdminState.load_reservations
+
+    @rx.event
+    def set_sort_option(self, value: str):
+        self.sort_option = value
+        return AdminState.load_reservations
+
     @rx.event
     def load_reservations(self):
-        self.reservations = [
+        # Filter by date
+        filtered = [
             r for r in self.all_reservations_data if r["date"] == self.selected_date
         ]
+
+        # Filter by status
+        if self.filter_status != "all":
+            filtered = [r for r in filtered if r["status"] == self.filter_status]
+
+        # Sort logic
+        def parse_time(t_str):
+            try:
+                return datetime.strptime(t_str, "%I:%M %p")
+            except ValueError:
+                return datetime.min
+
+        if self.sort_option == "time_asc":
+            filtered.sort(key=lambda r: parse_time(r["time"]))
+        elif self.sort_option == "time_desc":
+            filtered.sort(key=lambda r: parse_time(r["time"]), reverse=True)
+        elif self.sort_option == "status":
+            filtered.sort(key=lambda r: r["status"])
+
+        self.reservations = filtered
 
     @rx.event
     def load_analytics(self):
@@ -120,9 +154,103 @@ class AdminState(rx.State):
                 break
         return AdminState.load_reservations
 
+    is_editing: bool = False
+    editing_reservation_id: int = -1
+    edit_client_name: str = ""
+    edit_client_phone: str = ""
+    edit_service_name: str = ""
+    edit_barber_name: str = ""
+    edit_date: str = ""
+    edit_time: str = ""
+
+    @rx.event
+    def start_edit_reservation(self, reservation: Reservation):
+        self.is_editing = True
+        self.editing_reservation_id = reservation["id"]
+        self.edit_client_name = reservation["client_name"]
+        self.edit_client_phone = reservation["client_phone"]
+        self.edit_service_name = reservation["service_name"]
+        self.edit_barber_name = reservation["barber_name"]
+        self.edit_date = reservation["date"]
+        self.edit_time = reservation["time"]
+
+    @rx.event
+    def cancel_edit_reservation(self):
+        self.is_editing = False
+        self.editing_reservation_id = -1
+
+    @rx.event
+    def set_edit_client_name(self, value: str):
+        self.edit_client_name = value
+
+    @rx.event
+    def set_edit_client_phone(self, value: str):
+        self.edit_client_phone = value
+
+    @rx.event
+    def set_edit_service_name(self, value: str):
+        self.edit_service_name = value
+
+    @rx.event
+    def set_edit_barber_name(self, value: str):
+        self.edit_barber_name = value
+
+    @rx.event
+    def set_edit_date(self, value: str):
+        self.edit_date = value
+
+    @rx.event
+    def set_edit_time(self, value: str):
+        self.edit_time = value
+
+    @rx.event
+    async def save_edit_reservation(self):
+        from app.states.services_state import ServicesState
+
+        services_state = await self.get_state(ServicesState)
+        
+        # Calculate new price if service changed
+        new_price = "0"
+        for s in services_state.services:
+            if s["name"] == self.edit_service_name:
+                new_price = s["price"]
+                break
+
+        for r in self.all_reservations_data:
+            if r["id"] == self.editing_reservation_id:
+                r["client_name"] = self.edit_client_name
+                r["client_phone"] = self.edit_client_phone
+                r["service_name"] = self.edit_service_name
+                r["barber_name"] = self.edit_barber_name
+                r["date"] = self.edit_date
+                r["time"] = self.edit_time
+                r["service_price"] = new_price
+                break
+        
+        self.is_editing = False
+        self.editing_reservation_id = -1
+        yield AdminState.load_reservations
+
+    @rx.event
+    def delete_reservation(self, reservation_id: int):
+        self.all_reservations_data = [
+            r for r in self.all_reservations_data if r["id"] != reservation_id
+        ]
+        return AdminState.load_reservations
+        
+    @rx.event
+    def check_auth(self):
+        if not self.is_authenticated:
+            return rx.redirect("/admin/login")
+
     @rx.event
     async def add_walk_in(self):
         from app.states.services_state import ServicesState
+
+        # Validation
+        if not self.walk_in_client or not self.walk_in_phone or not self.walk_in_service:
+            # We could add a toast here, but for now just returning prevents the empty add
+            return
 
         services_state = await self.get_state(ServicesState)
         walk_in_date = self.selected_date
