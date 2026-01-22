@@ -618,11 +618,32 @@ def admin_services() -> rx.Component:
                             class_name="bg-[#111111] border border-white/10 rounded p-2 text-white",
                             default_value=ServicesState.new_duration,
                         ),
-                        rx.el.input(
-                            placeholder="URL Imagen",
-                            on_change=ServicesState.set_new_image,
-                            class_name="bg-[#111111] border border-white/10 rounded p-2 text-white",
-                            default_value=ServicesState.new_image,
+                        rx.el.div(
+                            rx.upload(
+                                rx.el.div(
+                                    rx.cond(
+                                        rx.selected_files("services_upload"),
+                                        rx.foreach(
+                                            rx.selected_files("services_upload"),
+                                            lambda f: rx.el.p(f, class_name="text-xs text-[#D4AF37] font-bold")
+                                        ),
+                                        rx.el.div(
+                                            rx.icon("image", size=16, class_name="text-gray-400 mr-2"),
+                                            rx.el.p("Subir Imagen", class_name="text-xs text-gray-400"),
+                                            class_name="flex items-center"
+                                        ),
+                                    ),
+                                    class_name="flex items-center justify-center h-full px-2"
+                                ),
+                                id="services_upload",
+                                border="1px dashed rgba(255,255,255,0.1)",
+                                padding="2",
+                                border_radius="lg",
+                                accept={"image/*": [".png", ".jpg", ".jpeg", ".webp"]},
+                                max_files=1,
+                                class_name="bg-[#111111] hover:border-[#D4AF37] transition-all cursor-pointer h-[42px]"
+                            ),
+                            class_name="w-full"
                         ),
                         rx.el.select(
                             rx.foreach(
@@ -634,7 +655,9 @@ def admin_services() -> rx.Component:
                         ),
                         rx.el.button(
                             "AÑADIR",
-                            on_click=ServicesState.add_service,
+                            on_click=ServicesState.handle_image_upload(
+                                rx.upload_files(upload_id="services_upload")
+                            ),
                             class_name="bg-[#D4AF37] text-black font-bold px-4 py-2 rounded hover:bg-white transition-colors",
                         ),
                         class_name="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4",
@@ -763,15 +786,38 @@ def admin_barbers() -> rx.Component:
                             class_name="bg-[#111111] border border-white/10 rounded p-2 text-white",
                             default_value=BarbersState.new_experience,
                         ),
-                        rx.el.input(
-                            placeholder="URL Imagen",
-                            on_change=BarbersState.set_new_image,
-                            class_name="bg-[#111111] border border-white/10 rounded p-2 text-white",
-                            default_value=BarbersState.new_image,
+                        rx.el.div(
+                            rx.upload(
+                                rx.el.div(
+                                    rx.cond(
+                                        rx.selected_files("barbers_upload"),
+                                        rx.foreach(
+                                            rx.selected_files("barbers_upload"),
+                                            lambda f: rx.el.p(f, class_name="text-xs text-[#D4AF37] font-bold")
+                                        ),
+                                        rx.el.div(
+                                            rx.icon("image", size=16, class_name="text-gray-400 mr-2"),
+                                            rx.el.p("Subir Imagen", class_name="text-xs text-gray-400"),
+                                            class_name="flex items-center"
+                                        ),
+                                    ),
+                                    class_name="flex items-center justify-center h-full px-2"
+                                ),
+                                id="barbers_upload",
+                                border="1px dashed rgba(255,255,255,0.1)",
+                                padding="2",
+                                border_radius="lg",
+                                accept={"image/*": [".png", ".jpg", ".jpeg", ".webp"]},
+                                max_files=1,
+                                class_name="bg-[#111111] hover:border-[#D4AF37] transition-all cursor-pointer h-[42px]"
+                            ),
+                            class_name="w-full"
                         ),
                         rx.el.button(
                             "AÑADIR",
-                            on_click=BarbersState.add_barber,
+                            on_click=BarbersState.handle_image_upload(
+                                rx.upload_files(upload_id="barbers_upload")
+                            ),
                             class_name="bg-[#D4AF37] text-black font-bold px-4 py-2 rounded hover:bg-white transition-colors",
                         ),
                         class_name="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4",

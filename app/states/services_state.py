@@ -1,5 +1,6 @@
 import reflex as rx
 from typing import TypedDict
+import os
 
 
 class Service(TypedDict):
@@ -117,3 +118,23 @@ class ServicesState(rx.State):
     @rx.event
     def set_new_image(self, value: str):
         self.new_image = value
+
+    async def handle_image_upload(self, files: list[rx.UploadFile]):
+        if not files:
+            return
+            
+        upload_dir = os.path.join("assets", "uploads")
+        if not os.path.exists(upload_dir):
+            os.makedirs(upload_dir)
+            
+        for file in files:
+            upload_data = await file.read()
+            filename = f"service_{self.new_name.replace(' ', '_').lower()}_{file.filename}"
+            outfile = os.path.join(upload_dir, filename)
+            
+            with open(outfile, "wb") as f:
+                f.write(upload_data)
+                
+            self.new_image = f"/uploads/{filename}"
+            
+        return ServicesState.add_service
