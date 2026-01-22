@@ -257,3 +257,400 @@ def admin_dashboard() -> rx.Component:
             class_name="ml-64 p-10 min-h-screen bg-[#0A0A0A]",
         ),
     )
+
+
+
+def stat_card(title: str, value: str, icon: str, trend: str = "") -> rx.Component:
+    return rx.el.div(
+        rx.el.div(
+            rx.el.span(
+                title,
+                class_name="text-[10px] font-bold tracking-widest text-gray-500 uppercase",
+            ),
+            rx.icon(icon, size=20, class_name="text-[#D4AF37]"),
+            class_name="flex justify-between items-start mb-4",
+        ),
+        rx.el.h3(value, class_name="text-3xl font-black text-white"),
+        rx.cond(
+            trend != "",
+            rx.el.p(trend, class_name="text-green-500 text-xs font-bold mt-2"),
+        ),
+        class_name="bg-[#111111] p-6 rounded-xl border border-white/5",
+    )
+
+
+def admin_analytics() -> rx.Component:
+    return rx.el.div(
+        admin_sidebar(),
+        rx.el.main(
+            rx.el.div(
+                rx.el.h1("Analytics", class_name="text-3xl font-bold text-white mb-8"),
+                rx.el.div(
+                    stat_card(
+                        "Total Reservas",
+                        AdminState.total_bookings.to_string(),
+                        "calendar-check",
+                    ),
+                    stat_card(
+                        "Ingresos Est.",
+                        f"₡{AdminState.total_revenue:,.0f}",
+                        "dollar-sign",
+                    ),
+                    stat_card(
+                        "Barbero Top",
+                        AdminState.top_barber_name,
+                        "scissors",
+                        f"{AdminState.top_barber_count} servicios",
+                    ),
+                    stat_card("Servicio Top", AdminState.top_service_name, "star"),
+                    class_name="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12",
+                ),
+                rx.el.div(
+                    rx.el.div(
+                        rx.el.h3(
+                            "Reservas por Día", class_name="text-white font-bold mb-6"
+                        ),
+                        rx.recharts.bar_chart(
+                            rx.recharts.cartesian_grid(
+                                stroke_dasharray="3 3", stroke="#333"
+                            ),
+                            rx.recharts.x_axis(data_key="date", stroke="#888"),
+                            rx.recharts.y_axis(stroke="#888"),
+                            rx.recharts.tooltip(
+                                content_style={
+                                    "backgroundColor": "#111",
+                                    "borderColor": "#333",
+                                }
+                            ),
+                            rx.recharts.bar(data_key="count", fill="#D4AF37"),
+                            data=AdminState.daily_bookings,
+                            width="100%",
+                            height=250,
+                        ),
+                        class_name="bg-[#111111] p-8 rounded-xl border border-white/5",
+                    ),
+                    rx.el.div(
+                        rx.el.h3(
+                            "Estado de Reservas", class_name="text-white font-bold mb-6"
+                        ),
+                        rx.recharts.bar_chart(
+                            rx.recharts.cartesian_grid(
+                                stroke_dasharray="3 3", stroke="#333"
+                            ),
+                            rx.recharts.x_axis(data_key="name", stroke="#888"),
+                            rx.recharts.y_axis(stroke="#888"),
+                            rx.recharts.tooltip(
+                                content_style={
+                                    "backgroundColor": "#111",
+                                    "borderColor": "#333",
+                                }
+                            ),
+                            rx.recharts.bar(data_key="value", fill="#4B5563"),
+                            data=AdminState.status_distribution,
+                            width="100%",
+                            height=250,
+                        ),
+                        class_name="bg-[#111111] p-8 rounded-xl border border-white/5",
+                    ),
+                    class_name="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8",
+                ),
+                rx.el.div(
+                    rx.el.h3(
+                        "Servicios Populares", class_name="text-white font-bold mb-6"
+                    ),
+                    rx.recharts.bar_chart(
+                        rx.recharts.cartesian_grid(
+                            stroke_dasharray="3 3", stroke="#333"
+                        ),
+                        rx.recharts.x_axis(type_="number", stroke="#888"),
+                        rx.recharts.y_axis(
+                            data_key="name", type_="category", width=150, stroke="#888"
+                        ),
+                        rx.recharts.tooltip(
+                            content_style={
+                                "backgroundColor": "#111",
+                                "borderColor": "#333",
+                            }
+                        ),
+                        rx.recharts.bar(data_key="value", fill="#D4AF37"),
+                        layout="vertical",
+                        data=AdminState.service_distribution,
+                        width="100%",
+                        height=300,
+                    ),
+                    class_name="bg-[#111111] p-8 rounded-xl border border-white/5",
+                ),
+            ),
+            class_name="ml-64 p-10 min-h-screen bg-[#0A0A0A]",
+        ),
+    )
+
+
+def admin_services() -> rx.Component:
+    return rx.el.div(
+        admin_sidebar(),
+        rx.el.main(
+            rx.el.div(
+                rx.el.h1(
+                    "Mantenimiento de Servicios",
+                    class_name="text-3xl font-bold text-white mb-8",
+                ),
+                rx.el.div(
+                    rx.el.h3(
+                        "Añadir Nuevo Servicio", class_name="text-white font-bold mb-4"
+                    ),
+                    rx.el.div(
+                        rx.el.input(
+                            placeholder="Nombre",
+                            on_change=ServicesState.set_new_name,
+                            class_name="bg-[#111111] border border-white/10 rounded p-2 text-white",
+                            default_value=ServicesState.new_name,
+                        ),
+                        rx.el.input(
+                            placeholder="Precio (₡)",
+                            on_change=ServicesState.set_new_price,
+                            class_name="bg-[#111111] border border-white/10 rounded p-2 text-white",
+                            default_value=ServicesState.new_price,
+                        ),
+                        rx.el.input(
+                            placeholder="Duración",
+                            on_change=ServicesState.set_new_duration,
+                            class_name="bg-[#111111] border border-white/10 rounded p-2 text-white",
+                            default_value=ServicesState.new_duration,
+                        ),
+                        rx.el.input(
+                            placeholder="URL Imagen",
+                            on_change=ServicesState.set_new_image,
+                            class_name="bg-[#111111] border border-white/10 rounded p-2 text-white",
+                            default_value=ServicesState.new_image,
+                        ),
+                        rx.el.select(
+                            rx.foreach(
+                                ServicesState.categories,
+                                lambda c: rx.el.option(c, value=c),
+                            ),
+                            on_change=ServicesState.set_new_category,
+                            class_name="bg-[#111111] border border-white/10 rounded p-2 text-white appearance-none",
+                        ),
+                        rx.el.button(
+                            "AÑADIR",
+                            on_click=ServicesState.add_service,
+                            class_name="bg-[#D4AF37] text-black font-bold px-4 py-2 rounded hover:bg-white transition-colors",
+                        ),
+                        class_name="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4",
+                    ),
+                    rx.el.div(
+                        rx.el.textarea(
+                            placeholder="Descripción",
+                            on_change=ServicesState.set_new_desc,
+                            class_name="w-full bg-[#111111] border border-white/10 rounded p-2 text-white mt-4 h-24",
+                            default_value=ServicesState.new_desc,
+                        )
+                    ),
+                    class_name="bg-[#111111] p-6 rounded-xl border border-white/5 mb-8",
+                ),
+                rx.el.div(
+                    rx.el.table(
+                        rx.el.thead(
+                            rx.el.tr(
+                                rx.el.th(
+                                    "IMAGEN",
+                                    class_name="text-left p-4 text-xs font-bold text-gray-500",
+                                ),
+                                rx.el.th(
+                                    "SERVICIO",
+                                    class_name="text-left p-4 text-xs font-bold text-gray-500",
+                                ),
+                                rx.el.th(
+                                    "CATEGORÍA",
+                                    class_name="text-left p-4 text-xs font-bold text-gray-500",
+                                ),
+                                rx.el.th(
+                                    "PRECIO",
+                                    class_name="text-left p-4 text-xs font-bold text-gray-500",
+                                ),
+                                rx.el.th(
+                                    "ACCIONES",
+                                    class_name="text-left p-4 text-xs font-bold text-gray-500",
+                                ),
+                            )
+                        ),
+                        rx.el.tbody(
+                            rx.foreach(
+                                ServicesState.services,
+                                lambda s: rx.el.tr(
+                                    rx.el.td(
+                                        rx.el.img(
+                                            src=s["image"],
+                                            class_name="w-12 h-12 object-cover rounded",
+                                        ),
+                                        class_name="p-4",
+                                    ),
+                                    rx.el.td(
+                                        rx.el.div(
+                                            rx.el.div(
+                                                s["name"],
+                                                class_name="text-white font-bold",
+                                            ),
+                                            rx.el.div(
+                                                s["duration"],
+                                                class_name="text-xs text-gray-500",
+                                            ),
+                                        ),
+                                        class_name="p-4",
+                                    ),
+                                    rx.el.td(
+                                        s["category"], class_name="p-4 text-gray-400"
+                                    ),
+                                    rx.el.td(
+                                        s["price"],
+                                        class_name="p-4 text-[#D4AF37] font-mono",
+                                    ),
+                                    rx.el.td(
+                                        rx.el.button(
+                                            rx.icon("trash-2", size=18),
+                                            on_click=lambda: ServicesState.delete_service(
+                                                s["id"]
+                                            ),
+                                            class_name="text-red-500 hover:text-red-400",
+                                        ),
+                                        class_name="p-4",
+                                    ),
+                                    class_name="border-b border-white/5",
+                                ),
+                            )
+                        ),
+                        class_name="w-full",
+                    ),
+                    class_name="bg-[#111111] rounded-xl border border-white/5 overflow-hidden",
+                ),
+            ),
+            class_name="ml-64 p-10 min-h-screen bg-[#0A0A0A]",
+        ),
+    )
+
+
+def admin_barbers() -> rx.Component:
+    return rx.el.div(
+        admin_sidebar(),
+        rx.el.main(
+            rx.el.div(
+                rx.el.h1(
+                    "Mantenimiento de Barberos",
+                    class_name="text-3xl font-bold text-white mb-8",
+                ),
+                rx.el.div(
+                    rx.el.h3(
+                        "Añadir Nuevo Barbero", class_name="text-white font-bold mb-4"
+                    ),
+                    rx.el.div(
+                        rx.el.input(
+                            placeholder="Nombre",
+                            on_change=BarbersState.set_new_name,
+                            class_name="bg-[#111111] border border-white/10 rounded p-2 text-white",
+                            default_value=BarbersState.new_name,
+                        ),
+                        rx.el.input(
+                            placeholder="Especialidad",
+                            on_change=BarbersState.set_new_specialty,
+                            class_name="bg-[#111111] border border-white/10 rounded p-2 text-white",
+                            default_value=BarbersState.new_specialty,
+                        ),
+                        rx.el.input(
+                            placeholder="Experiencia",
+                            on_change=BarbersState.set_new_experience,
+                            class_name="bg-[#111111] border border-white/10 rounded p-2 text-white",
+                            default_value=BarbersState.new_experience,
+                        ),
+                        rx.el.input(
+                            placeholder="URL Imagen",
+                            on_change=BarbersState.set_new_image,
+                            class_name="bg-[#111111] border border-white/10 rounded p-2 text-white",
+                            default_value=BarbersState.new_image,
+                        ),
+                        rx.el.button(
+                            "AÑADIR",
+                            on_click=BarbersState.add_barber,
+                            class_name="bg-[#D4AF37] text-black font-bold px-4 py-2 rounded hover:bg-white transition-colors",
+                        ),
+                        class_name="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4",
+                    ),
+                    rx.el.div(
+                        rx.el.textarea(
+                            placeholder="Bio / Perfil Profesional",
+                            on_change=BarbersState.set_new_bio,
+                            class_name="w-full bg-[#111111] border border-white/10 rounded p-2 text-white mt-4 h-24",
+                            default_value=BarbersState.new_bio,
+                        )
+                    ),
+                    class_name="bg-[#111111] p-6 rounded-xl border border-white/5 mb-8",
+                ),
+                rx.el.div(
+                    rx.el.table(
+                        rx.el.thead(
+                            rx.el.tr(
+                                rx.el.th(
+                                    "IMAGEN",
+                                    class_name="text-left p-4 text-xs font-bold text-gray-500",
+                                ),
+                                rx.el.th(
+                                    "NOMBRE",
+                                    class_name="text-left p-4 text-xs font-bold text-gray-500",
+                                ),
+                                rx.el.th(
+                                    "ESPECIALIDAD",
+                                    class_name="text-left p-4 text-xs font-bold text-gray-500",
+                                ),
+                                rx.el.th(
+                                    "EXPERIENCIA",
+                                    class_name="text-left p-4 text-xs font-bold text-gray-500",
+                                ),
+                                rx.el.th(
+                                    "ACCIONES",
+                                    class_name="text-left p-4 text-xs font-bold text-gray-500",
+                                ),
+                            )
+                        ),
+                        rx.el.tbody(
+                            rx.foreach(
+                                BarbersState.barbers,
+                                lambda b: rx.el.tr(
+                                    rx.el.td(
+                                        rx.el.img(
+                                            src=b["image"],
+                                            class_name="w-12 h-12 object-cover rounded-full",
+                                        ),
+                                        class_name="p-4",
+                                    ),
+                                    rx.el.td(
+                                        b["name"], class_name="p-4 text-white font-bold"
+                                    ),
+                                    rx.el.td(
+                                        b["specialty"],
+                                        class_name="p-4 text-gray-400 text-sm",
+                                    ),
+                                    rx.el.td(
+                                        b["experience"], class_name="p-4 text-white"
+                                    ),
+                                    rx.el.td(
+                                        rx.el.button(
+                                            rx.icon("trash-2", size=18),
+                                            on_click=lambda: BarbersState.delete_barber(
+                                                b["name"]
+                                            ),
+                                            class_name="text-red-500 hover:text-red-400",
+                                        ),
+                                        class_name="p-4",
+                                    ),
+                                    class_name="border-b border-white/5",
+                                ),
+                            )
+                        ),
+                        class_name="w-full",
+                    ),
+                    class_name="bg-[#111111] rounded-xl border border-white/5 overflow-hidden",
+                ),
+            ),
+            class_name="ml-64 p-10 min-h-screen bg-[#0A0A0A]",
+        ),
+    )
