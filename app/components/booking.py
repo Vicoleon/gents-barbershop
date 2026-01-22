@@ -26,7 +26,7 @@ def barber_selection_step() -> rx.Component:
             BarbersState.barbers,
             lambda barber: rx.el.div(
                 rx.el.img(
-                    src=barber["image"],
+                    src=barber["image"] + rx.cond(BarbersState.upload_timestamp > 0, "?" + BarbersState.upload_timestamp.to_string(), ""),
                     class_name="w-16 h-16 rounded-full object-cover border-2 border-[#D4AF37]/50",
                 ),
                 rx.el.div(
@@ -53,9 +53,16 @@ def service_selection_step() -> rx.Component:
             ServicesState.services,
             lambda service: rx.el.div(
                 rx.el.div(
-                    rx.el.h4(service["name"], class_name="text-white font-bold"),
-                    rx.el.p(service["duration"], class_name="text-xs text-[#D4AF37]"),
-                    class_name="flex-1",
+                    rx.el.img(
+                        src=service["image"],
+                        class_name="w-12 h-12 rounded object-cover border border-white/10 mr-4",
+                    ),
+                    rx.el.div(
+                        rx.el.h4(service["name"], class_name="text-white font-bold"),
+                        rx.el.p(service["duration"], class_name="text-xs text-[#D4AF37]"),
+                        class_name="flex-1",
+                    ),
+                    class_name="flex items-center"
                 ),
                 rx.el.span(service["price"], class_name="text-white font-mono"),
                 class_name=rx.cond(

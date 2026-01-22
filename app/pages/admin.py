@@ -219,9 +219,12 @@ def reservation_row(res: Reservation) -> rx.Component:
         ),
         rx.el.td(res["barber_name"], class_name="py-4 text-gray-400 text-sm"),
         rx.el.td(
-            rx.el.div(res["service_name"], class_name="text-gray-300 text-sm"),
             rx.el.div(
-                res["service_price"], class_name="text-[#D4AF37] text-xs font-mono"
+                rx.el.div(res["service_name"], class_name="text-gray-300 text-sm font-bold"),
+                rx.el.div(
+                    res["service_price"], class_name="text-[#D4AF37] text-xs font-mono"
+                ),
+                class_name="flex-1",
             ),
             class_name="py-4",
         ),
@@ -643,7 +646,17 @@ def admin_services() -> rx.Component:
                                 max_files=1,
                                 class_name="bg-[#111111] hover:border-[#D4AF37] transition-all cursor-pointer h-[42px]"
                             ),
-                            class_name="w-full"
+                            rx.cond(
+                                ServicesState.new_image != "",
+                                rx.el.div(
+                                    rx.el.img(
+                                        src=ServicesState.new_image,
+                                        class_name="h-[42px] w-[42px] object-cover rounded border border-[#D4AF37] shadow-lg ml-2"
+                                    ),
+                                    class_name="flex items-center"
+                                )
+                            ),
+                            class_name="w-full flex"
                         ),
                         rx.el.select(
                             rx.foreach(
@@ -704,10 +717,11 @@ def admin_services() -> rx.Component:
                                 lambda s: rx.el.tr(
                                     rx.el.td(
                                         rx.el.img(
-                                            src=s["image"],
-                                            class_name="w-12 h-12 object-cover rounded",
+                                            src=s["image"] + rx.cond(ServicesState.upload_timestamp > 0, "?" + ServicesState.upload_timestamp.to_string(), ""),
+                                            class_name="w-16 h-16 object-cover rounded shadow-lg border border-white/10 hover:scale-150 transition-transform cursor-zoom-in",
+                                            on_click=rx.redirect(s["image"], is_external=True),
                                         ),
-                                        class_name="p-4",
+                                        class_name="p-4 w-20",
                                     ),
                                     rx.el.td(
                                         rx.el.div(
@@ -726,7 +740,11 @@ def admin_services() -> rx.Component:
                                         s["category"], class_name="p-4 text-gray-400"
                                     ),
                                     rx.el.td(
-                                        s["price"],
+                                        rx.cond(
+                                            s["price"].contains("₡"),
+                                            s["price"],
+                                            "₡" + s["price"]
+                                        ),
                                         class_name="p-4 text-[#D4AF37] font-mono",
                                     ),
                                     rx.el.td(
@@ -811,7 +829,17 @@ def admin_barbers() -> rx.Component:
                                 max_files=1,
                                 class_name="bg-[#111111] hover:border-[#D4AF37] transition-all cursor-pointer h-[42px]"
                             ),
-                            class_name="w-full"
+                            rx.cond(
+                                BarbersState.new_image != "",
+                                rx.el.div(
+                                    rx.el.img(
+                                        src=BarbersState.new_image + rx.cond(BarbersState.upload_timestamp > 0, "?" + BarbersState.upload_timestamp.to_string(), ""),
+                                        class_name="h-[42px] w-[42px] object-cover rounded border border-[#D4AF37] shadow-lg ml-2"
+                                    ),
+                                    class_name="flex items-center"
+                                )
+                            ),
+                            class_name="w-full flex"
                         ),
                         rx.el.button(
                             "AÑADIR",
@@ -864,10 +892,11 @@ def admin_barbers() -> rx.Component:
                                 lambda b: rx.el.tr(
                                     rx.el.td(
                                         rx.el.img(
-                                            src=b["image"],
-                                            class_name="w-12 h-12 object-cover rounded-full",
+                                            src=b["image"] + rx.cond(BarbersState.upload_timestamp > 0, "?" + BarbersState.upload_timestamp.to_string(), ""),
+                                            class_name="w-16 h-16 object-cover rounded-full shadow-lg border-2 border-white/10 hover:scale-150 transition-transform cursor-zoom-in",
+                                            on_click=rx.redirect(b["image"], is_external=True),
                                         ),
-                                        class_name="p-4",
+                                        class_name="p-4 w-20",
                                     ),
                                     rx.el.td(
                                         b["name"], class_name="p-4 text-white font-bold"
@@ -877,15 +906,20 @@ def admin_barbers() -> rx.Component:
                                         class_name="p-4 text-gray-400 text-sm",
                                     ),
                                     rx.el.td(
-                                        b["experience"], class_name="p-4 text-white"
+                                        rx.cond(
+                                            b["experience"].lower().contains("años"),
+                                            b["experience"],
+                                            b["experience"] + " años"
+                                        ),
+                                        class_name="p-4 text-white"
                                     ),
                                     rx.el.td(
                                         rx.el.button(
-                                            rx.icon("trash-2", size=18),
+                                            "ELIMINAR",
                                             on_click=lambda: BarbersState.delete_barber(
                                                 b["name"]
                                             ),
-                                            class_name="text-red-500 hover:text-red-400",
+                                            class_name="text-xs text-red-500 hover:text-red-400 font-bold",
                                         ),
                                         class_name="p-4",
                                     ),

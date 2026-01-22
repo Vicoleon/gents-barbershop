@@ -1,0 +1,30 @@
+[
+    {
+        "name": "Alejandro M.",
+        "specialty": "Master Barber & Fade Expert",
+        "experience": "12 años",
+        "bio": "Especialista en cortes urbanos y técnicas europeas. Apasionado por la precisión.",
+        "image": "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=1974&auto=format&fit=crop"
+    },
+    {
+        "name": "Cristian V.",
+        "specialty": "Beard Stylist & Rituals",
+        "experience": "8 años",
+        "bio": "Experto en el ritual de la toalla caliente y cuidado profundo de la barba.",
+        "image": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=2080&auto=format&fit=crop"
+    },
+    {
+        "name": "Julian R.",
+        "specialty": "Classic Scissor Cuts",
+        "experience": "15 años",
+        "bio": "Maestro en técnicas clásicas a tijera y estilos tradicionales de caballero.",
+        "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=2070&auto=format&fit=crop"
+    },
+    {
+        "name": "Gato",
+        "specialty": "Todo",
+        "experience": "20 años",
+        "bio": "",
+        "image": "/uploads/barber_4.jpg"
+    }
+]

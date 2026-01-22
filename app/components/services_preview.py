@@ -1,11 +1,11 @@
 import reflex as rx
-
+from app.states.services_state import ServicesState
 
 def service_card(title: str, price: str, desc: str, img: str) -> rx.Component:
     return rx.el.div(
         rx.el.div(
             rx.el.img(
-                src=img,
+                src=img + rx.cond(ServicesState.upload_timestamp > 0, "?" + ServicesState.upload_timestamp.to_string(), ""),
                 class_name="w-full h-64 object-cover grayscale hover:grayscale-0 transition-all duration-700 transform group-hover:scale-110",
             ),
             rx.el.div(
@@ -48,23 +48,14 @@ def services_preview() -> rx.Component:
                 class_name="mb-12",
             ),
             rx.el.div(
-                service_card(
-                    "Corte Clásico",
-                    "₡12,000",
-                    "Corte tradicional con terminación a navaja, lavado y peinado con productos premium.",
-                    "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=2074&auto=format&fit=crop",
-                ),
-                service_card(
-                    "Barba Premium",
-                    "₡10,000",
-                    "Ritual de toallas calientes, perfilado preciso y aceites hidratantes para un acabado impecable.",
-                    "https://images.unsplash.com/photo-1621605815841-aa33c5ce7027?q=80&w=2070&auto=format&fit=crop",
-                ),
-                service_card(
-                    "Facial Express",
-                    "₡15,000",
-                    "Limpieza profunda y exfoliación diseñada para la piel del hombre moderno. Frescura instantánea.",
-                    "https://images.unsplash.com/photo-1512690118275-303966697219?q=80&w=2070&auto=format&fit=crop",
+                rx.foreach(
+                    ServicesState.services[:3],
+                    lambda s: service_card(
+                        s["name"],
+                        s["price"],
+                        s["description"],
+                        s["image"],
+                    )
                 ),
                 class_name="grid grid-cols-1 md:grid-cols-3 gap-8",
             ),

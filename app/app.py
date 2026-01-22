@@ -23,7 +23,7 @@ def service_item_card(service: Service) -> rx.Component:
     return rx.el.div(
         rx.el.div(
             rx.el.img(
-                src=service["image"],
+                src=service["image"] + rx.cond(ServicesState.upload_timestamp > 0, "?" + ServicesState.upload_timestamp.to_string(), ""),
                 class_name="w-full h-48 object-cover grayscale group-hover:grayscale-0 transition-all duration-700",
             ),
             rx.el.div(
@@ -112,7 +112,7 @@ def barber_card(barber: Barber) -> rx.Component:
     return rx.el.div(
         rx.el.div(
             rx.el.img(
-                src=barber["image"],
+                src=barber["image"] + rx.cond(BarbersState.upload_timestamp > 0, "?" + BarbersState.upload_timestamp.to_string(), ""),
                 class_name="w-full h-[400px] object-cover grayscale group-hover:grayscale-0 transition-all duration-700",
             ),
             rx.el.div(
@@ -146,7 +146,7 @@ def barber_card(barber: Barber) -> rx.Component:
                 barber["bio"], class_name="text-gray-400 text-sm leading-relaxed mb-8"
             ),
             rx.el.button(
-                f"AGENDAR CON {barber['name'].upper().split(' ')[0]}",
+                "AGENDAR CITA",
                 on_click=lambda: BookingState.start_booking_with_barber(barber),
                 class_name="w-full py-4 bg-[#D4AF37] text-black font-black text-[10px] tracking-[0.2em] hover:bg-white transition-all",
             ),
@@ -224,14 +224,14 @@ app = rx.App(
         ),
     ],
 )
-app.add_page(index, route="/")
-app.add_page(services_page, route="/servicios")
-app.add_page(barbers_page, route="/barberos")
+app.add_page(index, route="/", on_load=[ServicesState.on_load, BarbersState.on_load])
+app.add_page(services_page, route="/servicios", on_load=ServicesState.on_load)
+app.add_page(barbers_page, route="/barberos", on_load=BarbersState.on_load)
 app.add_page(location_page, route="/ubicacion")
 app.add_page(login_page, route="/admin/login")
 app.add_page(admin_dashboard, route="/admin", on_load=AdminState.load_reservations)
-app.add_page(admin_services, route="/admin/servicios")
-app.add_page(admin_barbers, route="/admin/barberos")
+app.add_page(admin_services, route="/admin/servicios", on_load=ServicesState.on_load)
+app.add_page(admin_barbers, route="/admin/barberos", on_load=BarbersState.on_load)
 app.add_page(
     admin_analytics, route="/admin/analytics", on_load=AdminState.load_analytics
 )

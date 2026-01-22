@@ -1,0 +1,47 @@
+[
+    {
+        "id": 1,
+        "name": "Corte de Autor",
+        "description": "Asesoría de imagen, corte personalizado, lavado premium y peinado final.",
+        "duration": "45 min",
+        "price": "₡12,000",
+        "category": "Cortes",
+        "image": "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?q=80&w=2074&auto=format&fit=crop"
+    },
+    {
+        "id": 2,
+        "name": "Corte & Barba Ritual",
+        "description": "Experiencia completa de grooming con toallas calientes y perfilado a navaja.",
+        "duration": "90 min",
+        "price": "₡20,000",
+        "category": "Combos",
+        "image": "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?q=80&w=2070&auto=format&fit=crop"
+    },
+    {
+        "id": 3,
+        "name": "Barba Express",
+        "description": "Limpieza, hidratación y perfilado rápido para mantener tu estilo impecable.",
+        "duration": "30 min",
+        "price": "₡8,000",
+        "category": "Barba",
+        "image": "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?q=80&w=2070&auto=format&fit=crop"
+    },
+    {
+        "id": 4,
+        "name": "Facial Nunciatura",
+        "description": "Limpieza profunda, exfoliación y mascarilla relajante para la piel masculina.",
+        "duration": "40 min",
+        "price": "₡15,000",
+        "category": "Faciales",
+        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1974&auto=format&fit=crop"
+    },
+    {
+        "id": 5,
+        "name": "Gatos",
+        "description": "",
+        "duration": "23",
+        "price": "₡23,433",
+        "category": "Cortes",
+        "image": "/uploads/service_5.jpg"
+    }
+]
