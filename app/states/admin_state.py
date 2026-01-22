@@ -1,6 +1,6 @@
 import reflex as rx
 from app.models import Reservation
-from datetime import datetime
+from datetime import datetime, timedelta
 import logging
 from collections import Counter
 
@@ -25,6 +25,103 @@ class AdminState(rx.State):
     walk_in_service: str = ""
     walk_in_barber: str = ""
     walk_in_datetime: str = ""
+    view_mode: str = "list"  # list, week, day
+    heatmap_data: dict[str, int] = {}
+    heatmap_metadata: dict[str, str] = {} # Date -> class_name
+    day_reservations: dict[str, list[dict]] = {} # Organized by barber
+
+    @rx.event
+    def set_view_mode(self, mode: str):
+        self.view_mode = mode
+    
+    @rx.var
+    def week_dates(self) -> list[str]:
+        try:
+            date_obj = datetime.strptime(self.selected_date, "%Y-%m-%d")
+        except ValueError:
+            date_obj = datetime.now()
+        
+        # Start of week (Monday)
+        start_of_week = date_obj - timedelta(days=date_obj.weekday())
+        return [(start_of_week + timedelta(days=i)).strftime("%Y-%m-%d") for i in range(7)]
+
+    async def _update_calendar_data(self):
+        # Heatmap
+        counts = Counter(r["date"] for r in self.all_reservations_data)
+        
+        # Ensure all visible dates have a value (to avoid key errors in UI)
+        calendar_dict = dict(counts)
+        metadata_dict = {}
+        static_heat_classes = "flex-1 p-4 rounded-lg border border-white/10 text-center transition-all hover:border-[#D4AF37] "
+        
+        for d in self.week_dates:
+             if d not in calendar_dict:
+                 calendar_dict[d] = 0
+             
+             c = calendar_dict[d]
+             if c == 0:
+                 intensity = "bg-white/5 text-gray-400 border-white/10"
+             elif c < 4:
+                 # Light day - Green
+                 intensity = "bg-green-500/20 text-green-400 border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.1)]"
+             elif c < 8:
+                 # Moderate day - Yellow
+                 intensity = "bg-yellow-500/20 text-yellow-400 border-yellow-500/30 shadow-[0_0_20px_rgba(234,179,8,0.1)]"
+             else:
+                 # Busy day - Red
+                 intensity = "bg-red-500/30 text-red-400 border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.15)]"
+             
+             metadata_dict[d] = static_heat_classes + intensity
+             
+        self.heatmap_data = calendar_dict
+        self.heatmap_metadata = metadata_dict
+
+        # Day Reservations
+        from app.states.barbers_state import BarbersState
+        barbers_state = await self.get_state(BarbersState)
+        
+        # Initialize for all current barbers
+        grouped = {b["name"]: [] for b in barbers_state.barbers}
+        
+        day_res = [r.copy() for r in self.all_reservations_data if r["date"] == self.selected_date]
+        
+        # Color and Position mapper
+        def get_color(service_name):
+            colors = [
+                "bg-blue-500", "bg-purple-500", "bg-green-500", 
+                "bg-yellow-500", "bg-red-500", "bg-pink-500", "bg-indigo-500"
+            ]
+            hash_val = sum(ord(c) for c in service_name)
+            return colors[hash_val % len(colors)]
+
+        def get_top_pos(time_str):
+            try:
+                dt = datetime.strptime(time_str, "%I:%M %p")
+                minutes = dt.hour * 60 + dt.minute
+            except ValueError:
+                minutes = 0
+            
+            start_minutes = 8 * 60 # 8 AM
+            total_minutes = 12 * 60
+            
+            if minutes < start_minutes:
+                return "0%"
+            
+            offset = minutes - start_minutes
+            percent = (offset / total_minutes) * 100
+            return f"{percent}%"
+
+        for r in day_res:
+             r["full_class"] = f"absolute w-full p-2 rounded border border-white/10 text-white hover:z-10 transition-all hover:scale-[1.02] shadow-sm cursor-pointer {get_color(r['service_name'])}"
+             r["top_position"] = get_top_pos(r["time"])
+             barber = r["barber_name"]
+             if barber not in grouped:
+                 grouped[barber] = []
+             grouped[barber].append(r)
+        
+        self.day_reservations = grouped
+
+
 
     @rx.event
     def set_walk_in_client(self, value: str):
@@ -83,7 +180,7 @@ class AdminState(rx.State):
         return AdminState.load_reservations
 
     @rx.event
-    def load_reservations(self):
+    async def load_reservations(self):
         # Filter by date
         filtered = [
             r for r in self.all_reservations_data if r["date"] == self.selected_date
@@ -108,6 +205,7 @@ class AdminState(rx.State):
             filtered.sort(key=lambda r: r["status"])
 
         self.reservations = filtered
+        await self._update_calendar_data()
 
     @rx.event
     def load_analytics(self):

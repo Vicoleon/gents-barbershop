@@ -3,6 +3,7 @@ from app.states.admin_state import AdminState
 from app.states.services_state import ServicesState
 from app.states.barbers_state import BarbersState
 from app.components.admin_sidebar import admin_sidebar
+from app.components.calendar_view import calendar_view
 from app.models import Reservation
 
 
@@ -399,46 +400,52 @@ def admin_dashboard() -> rx.Component:
                     class_name="bg-[#111111] p-6 rounded-xl border border-white/5 mb-8 relative",
                 ),
                 rx.el.div(
-                    rx.el.table(
-                        rx.el.thead(
-                            rx.el.tr(
-                                rx.el.th(
-                                    "FECHA",
-                                    class_name="text-left text-[10px] font-bold tracking-widest text-gray-500 pb-4",
+                    calendar_view(),
+                    rx.cond(
+                        AdminState.view_mode == "list",
+                        rx.el.div(
+                            rx.el.table(
+                                rx.el.thead(
+                                    rx.el.tr(
+                                        rx.el.th(
+                                            "FECHA",
+                                            class_name="text-left text-[10px] font-bold tracking-widest text-gray-500 pb-4",
+                                        ),
+                                        rx.el.th(
+                                            "HORA",
+                                            class_name="text-left text-[10px] font-bold tracking-widest text-gray-500 pb-4",
+                                        ),
+                                        rx.el.th(
+                                            "CLIENTE",
+                                            class_name="text-left text-[10px] font-bold tracking-widest text-gray-500 pb-4",
+                                        ),
+                                        rx.el.th(
+                                            "BARBERO",
+                                            class_name="text-left text-[10px] font-bold tracking-widest text-gray-500 pb-4",
+                                        ),
+                                        rx.el.th(
+                                            "SERVICIO",
+                                            class_name="text-left text-[10px] font-bold tracking-widest text-gray-500 pb-4",
+                                        ),
+                                        rx.el.th(
+                                            "ESTADO",
+                                            class_name="text-left text-[10px] font-bold tracking-widest text-gray-500 pb-4",
+                                        ),
+                                        rx.el.th(
+                                            "ACCIONES",
+                                            class_name="text-left text-[10px] font-bold tracking-widest text-gray-500 pb-4",
+                                        ),
+                                    ),
+                                    class_name="border-b border-white/10",
                                 ),
-                                rx.el.th(
-                                    "HORA",
-                                    class_name="text-left text-[10px] font-bold tracking-widest text-gray-500 pb-4",
+                                rx.el.tbody(
+                                    rx.foreach(AdminState.reservations, reservation_row)
                                 ),
-                                rx.el.th(
-                                    "CLIENTE",
-                                    class_name="text-left text-[10px] font-bold tracking-widest text-gray-500 pb-4",
-                                ),
-                                rx.el.th(
-                                    "BARBERO",
-                                    class_name="text-left text-[10px] font-bold tracking-widest text-gray-500 pb-4",
-                                ),
-                                rx.el.th(
-                                    "SERVICIO",
-                                    class_name="text-left text-[10px] font-bold tracking-widest text-gray-500 pb-4",
-                                ),
-                                rx.el.th(
-                                    "ESTADO",
-                                    class_name="text-left text-[10px] font-bold tracking-widest text-gray-500 pb-4",
-                                ),
-                                rx.el.th(
-                                    "ACCIONES",
-                                    class_name="text-left text-[10px] font-bold tracking-widest text-gray-500 pb-4",
-                                ),
+                                class_name="w-full",
                             ),
-                            class_name="border-b border-white/10",
+                            class_name="bg-[#111111] rounded-xl border border-white/5 p-8 overflow-x-auto",
                         ),
-                        rx.el.tbody(
-                            rx.foreach(AdminState.reservations, reservation_row)
-                        ),
-                        class_name="w-full",
-                    ),
-                    class_name="bg-[#111111] rounded-xl border border-white/5 p-8 overflow-x-auto",
+                    )
                 ),
             ),
             class_name="ml-64 p-10 min-h-screen bg-[#0A0A0A]",
