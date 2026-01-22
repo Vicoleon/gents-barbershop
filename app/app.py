@@ -229,7 +229,7 @@ app.add_page(services_page, route="/servicios", on_load=ServicesState.on_load)
 app.add_page(barbers_page, route="/barberos", on_load=BarbersState.on_load)
 app.add_page(location_page, route="/ubicacion")
 app.add_page(login_page, route="/admin/login")
-app.add_page(admin_dashboard, route="/admin", on_load=AdminState.load_reservations)
+app.add_page(admin_dashboard, route="/admin", on_load=AdminState.on_load)
 app.add_page(admin_services, route="/admin/servicios", on_load=ServicesState.on_load)
 app.add_page(admin_barbers, route="/admin/barberos", on_load=BarbersState.on_load)
 app.add_page(

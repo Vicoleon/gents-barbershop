@@ -3,6 +3,8 @@ from app.models import Reservation
 from datetime import datetime, timedelta
 import logging
 from collections import Counter
+import json
+import os
 
 
 class AdminState(rx.State):
@@ -12,6 +14,34 @@ class AdminState(rx.State):
     selected_date: str = datetime.now().strftime("%Y-%m-%d")
     all_reservations_data: list[Reservation] = []
     reservations: list[Reservation] = []
+    
+    @rx.event
+    def on_load(self):
+        self.load_reservations_from_json()
+        return AdminState.load_reservations
+
+    def load_reservations_from_json(self):
+        data_path = os.path.join("data", "reservations.json")
+        if os.path.exists(data_path):
+            try:
+                with open(data_path, "r", encoding="utf-8") as f:
+                    self.all_reservations_data = json.load(f)
+                return
+            except Exception as e:
+                logging.exception(f"Error loading reservations: {e}")
+        
+        # Initial empty if no data
+        self.all_reservations_data = []
+
+    def save_reservations_to_json(self):
+        if not os.path.exists("data"):
+            os.makedirs("data")
+        data_path = os.path.join("data", "reservations.json")
+        try:
+            with open(data_path, "w", encoding="utf-8") as f:
+                json.dump(self.all_reservations_data, f, ensure_ascii=False, indent=4)
+        except Exception as e:
+            logging.exception(f"Error saving reservations: {e}")
     total_bookings: int = 0
     total_revenue: float = 0
     top_barber_name: str = "N/A"
@@ -250,6 +280,7 @@ class AdminState(rx.State):
             if r["id"] == reservation_id:
                 r["status"] = new_status
                 break
+        self.save_reservations_to_json()
         return AdminState.load_reservations
 
     is_editing: bool = False
@@ -325,6 +356,7 @@ class AdminState(rx.State):
                 r["service_price"] = new_price
                 break
         
+        self.save_reservations_to_json()
         self.is_editing = False
         self.editing_reservation_id = -1
         yield AdminState.load_reservations
@@ -334,6 +366,7 @@ class AdminState(rx.State):
         self.all_reservations_data = [
             r for r in self.all_reservations_data if r["id"] != reservation_id
         ]
+        self.save_reservations_to_json()
         return AdminState.load_reservations
         
     @rx.event
@@ -387,4 +420,5 @@ class AdminState(rx.State):
         self.walk_in_datetime = ""
         self.walk_in_service = ""
         self.walk_in_barber = ""
+        self.save_reservations_to_json()
         yield AdminState.load_reservations

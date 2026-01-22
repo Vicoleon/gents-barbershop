@@ -1,0 +1,15 @@
+[
+    {
+        "id": 1,
+        "reference_number": "GENTS-OIW2SK",
+        "client_name": "Jose",
+        "client_phone": "30304403",
+        "barber_name": "Gato",
+        "service_name": "Corte & Barba Ritual",
+        "service_price": "₡20,000",
+        "date": "2026-01-23",
+        "time": "05:00 PM",
+        "status": "confirmed",
+        "created_at": "2026-01-22T17:50:44.068487"
+    }
+]
