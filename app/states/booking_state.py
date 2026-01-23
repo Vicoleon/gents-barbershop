@@ -99,9 +99,6 @@ class BookingState(rx.State):
         from app.states.admin_state import AdminState
 
         admin_state = await self.get_state(AdminState)
-        # Load existing reservations from disk first to avoid overwriting other people's bookings
-        admin_state.load_reservations_from_json()
-        
         self.booking_reference = "GENTS-" + "".join(
             random.choices(string.ascii_uppercase + string.digits, k=6)
         )
@@ -114,10 +111,7 @@ class BookingState(rx.State):
             else "No seleccionado"
         )
         service_price = self.selected_service["price"] if self.selected_service else "0"
-        
-        # Unique ID based on all known reservations
         new_id = len(admin_state.all_reservations_data) + 1
-        
         new_res: Reservation = {
             "id": new_id,
             "reference_number": self.booking_reference,
@@ -132,10 +126,6 @@ class BookingState(rx.State):
             "created_at": datetime.now().isoformat(),
         }
         admin_state.all_reservations_data.append(new_res)
-        
-        # Save to disk
-        admin_state.save_reservations_to_json()
-        
         self.next_step()
 
     @rx.event
