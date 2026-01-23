@@ -26,7 +26,7 @@ def barber_selection_step() -> rx.Component:
             BarbersState.barbers,
             lambda barber: rx.el.div(
                 rx.el.img(
-                    src=barber["image"] + rx.cond(BarbersState.upload_timestamp > 0, "?" + BarbersState.upload_timestamp.to_string(), ""),
+                    src=barber["image"],
                     class_name="w-16 h-16 rounded-full object-cover border-2 border-[#D4AF37]/50",
                 ),
                 rx.el.div(
@@ -53,16 +53,9 @@ def service_selection_step() -> rx.Component:
             ServicesState.services,
             lambda service: rx.el.div(
                 rx.el.div(
-                    rx.el.img(
-                        src=service["image"],
-                        class_name="w-12 h-12 rounded object-cover border border-white/10 mr-4",
-                    ),
-                    rx.el.div(
-                        rx.el.h4(service["name"], class_name="text-white font-bold"),
-                        rx.el.p(service["duration"], class_name="text-xs text-[#D4AF37]"),
-                        class_name="flex-1",
-                    ),
-                    class_name="flex items-center"
+                    rx.el.h4(service["name"], class_name="text-white font-bold"),
+                    rx.el.p(service["duration"], class_name="text-xs text-[#D4AF37]"),
+                    class_name="flex-1",
                 ),
                 rx.el.span(service["price"], class_name="text-white font-mono"),
                 class_name=rx.cond(
@@ -88,7 +81,7 @@ def datetime_selection_step() -> rx.Component:
                 type="date",
                 on_change=BookingState.set_date,
                 class_name="w-full bg-[#111111] border border-white/20 rounded-lg p-3 text-white focus:border-[#D4AF37] outline-none transition-colors",
-                value=BookingState.selected_date,
+                default_value=BookingState.selected_date,
             ),
             class_name="mb-8",
         ),
@@ -134,7 +127,7 @@ def client_info_step() -> rx.Component:
                 placeholder="Ej. Juan Pérez",
                 on_change=BookingState.set_client_name,
                 class_name="w-full bg-[#111111] border border-white/20 rounded-lg p-4 text-white focus:border-[#D4AF37] outline-none transition-colors mb-6",
-                value=BookingState.client_name,
+                default_value=BookingState.client_name,
             ),
         ),
         rx.el.div(
@@ -146,7 +139,7 @@ def client_info_step() -> rx.Component:
                 placeholder="Ej. 8888-8888",
                 on_change=BookingState.set_client_phone,
                 class_name="w-full bg-[#111111] border border-white/20 rounded-lg p-4 text-white focus:border-[#D4AF37] outline-none transition-colors",
-                value=BookingState.client_phone,
+                default_value=BookingState.client_phone,
             ),
             class_name="mb-8",
         ),
